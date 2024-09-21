@@ -18,6 +18,7 @@ jobs:
         id: changed-dirs
         run: |
           git diff --name-only HEAD HEAD~1 | \
+          grep '\.tf$' | \
           sed 's|/[^/]*$||' | \
           sort -u | \
           jq -R -s -c 'split("\n") | map(select(length > 0))' > changed_dirs.json

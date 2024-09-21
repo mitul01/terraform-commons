@@ -79,17 +79,19 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PR_NUMBER=${{ github.event.pull_request.number }}
-          COMMENT="#### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-                   #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
-                  #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
-                  <details><summary>Show Plan</summary>
-                  \`\`\`terraform
-                  ${{ steps.plan.outputs.stdout }}
-                  \`\`\`
-                  </details>
-                *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*"
+          COMMENT="#### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
+          #### Terraform Validation 🤖 \`${{ steps.validate.outcome }}\`
+          #### Terraform Plan 📖 \`${{ steps.plan.outcome }}\`
 
-          gh pr comment "$PR_NUMBER" --body "$COMMENT"
+          <details><summary>Show Plan</summary>
+
+          \`\`\`terraform
+          ${{ steps.plan.outputs.stdout }}
+          \`\`\`
+
+          </details>
+
+          *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*"
 
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'

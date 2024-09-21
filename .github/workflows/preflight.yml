@@ -36,7 +36,6 @@ jobs:
     permissions:
       pull-requests: write
     needs: extract-changed-directories
-    if: fromJson(needs.extract-changed-directories.outputs.dirs) != '[]'
     strategy:
       matrix:
         dir: ${{ fromJson(needs.extract-changed-directories.outputs.dirs) }}

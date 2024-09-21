@@ -28,9 +28,12 @@ jobs:
           cat changed_dirs.json
           echo "dirs=$(cat changed_dirs.json)" >> $GITHUB_OUTPUT
 
-      - name: Confirm Output Setting
+      - name: Confirm Output
         run: |
           echo "Changes directories: ${{ steps.changed-dirs.outputs.dirs }}"
+
+    outputs:
+      dirs: ${{ steps.changed-dirs.outputs.dirs }}
 
 
   terraform-preflight:

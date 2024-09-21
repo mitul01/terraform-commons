@@ -11,22 +11,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
-      - name: Set up Git
-        run: git fetch origin main
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh
 
-      - name: Get unique changed projects
+      - name: Get unique changed files in PR
         id: changed-dirs
         run: |
-          git diff --name-only HEAD HEAD~1 | \
-          grep '\.tf$' | \
-          sed 's|/[^/]*$||' | \
-          sort -u | \
-          jq -R -s -c 'split("\n") | map(select(length > 0))' > changed_dirs.json
-          echo "Unique changed directories:"
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          echo $PR_NUMBER
+          FILES=$(gh pr view $PR_NUMBER --json files -q '.files[].path')
+          echo "$FILES" | grep '\.tf$' | sed 's|/[^/]*$||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))' > changed_dirs.json
+          
           cat changed_dirs.json
-          echo "::set-output name=dirs::$(cat changed_dirs.json)"
+          
+          echo "dirs=$(cat changed_dirs.json)" >> $GITHUB_OUTPUT
 
   terraform-preflight:
     name: "terraform-preflight"
@@ -34,6 +34,7 @@ jobs:
     permissions:
       pull-requests: write
     needs: extract-changed-directories
+    if: fromJson(needs.extract-changed-directories.outputs.dirs) != '[]'
     strategy:
       matrix:
         dir: ${{ fromJson(needs.extract-changed-directories.outputs.dirs) }}

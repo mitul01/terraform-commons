@@ -93,6 +93,8 @@ jobs:
 
           *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*"
 
+          gh pr comment "$PR_NUMBER" --body "$COMMENT"
+
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
         run: exit 1

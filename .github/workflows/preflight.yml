@@ -25,10 +25,8 @@ jobs:
           echo $PR_NUMBER
           FILES=$(gh pr view $PR_NUMBER --json files -q '.files[].path')
           echo "$FILES" | grep '\.tf$' | sed 's|/[^/]*$||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))' > changed_dirs.json
-          
-          cat changed_dirs.json
-          
           echo "dirs=$(cat changed_dirs.json)" >> $GITHUB_OUTPUT
+          echo $dirs
 
   terraform-preflight:
     name: "terraform-preflight"
@@ -36,6 +34,7 @@ jobs:
     permissions:
       pull-requests: write
     needs: extract-changed-directories
+    if: needs.extract-changed-directories.outputs.dirs != '[]' && needs.extract-changed-directories.outputs.dirs != ''
     strategy:
       matrix:
         dir: ${{ fromJson(needs.extract-changed-directories.outputs.dirs) }}

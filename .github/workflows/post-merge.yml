@@ -1,0 +1,57 @@
+name: "Post-Merge"
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  extract-changed-directories:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get Changed Terraform Directories
+        id: get-changes
+        run: |
+          echo "Fetching changed files..."
+          FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | grep '\.tf$')
+          if [ -z "$FILES" ]; then
+            echo "No Terraform files changed."
+            echo "changed_dirs=[]" >> $GITHUB_ENV
+          else
+            echo "Changed files:"
+            echo "$FILES"
+            DIRS=$(echo "$FILES" | sed 's|/[^/]*$||' | sort -u)
+            echo "changed_dirs=${DIRS}" >> $GITHUB_ENV
+          fi
+
+      - name: Set Output
+        run: echo "dirs=${{ env.changed_dirs }}" >> $GITHUB_ENV
+
+  terraform-apply:
+    runs-on: ubuntu-latest
+    needs: extract-changed-directories
+    if: env.changed_dirs != '[]'
+    strategy:
+      matrix:
+        dir: ${{ fromJson(env.changed_dirs) }}
+    defaults:
+      run:
+        working-directory: ${{ matrix.dir }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve

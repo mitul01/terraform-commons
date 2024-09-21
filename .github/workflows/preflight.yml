@@ -25,8 +25,13 @@ jobs:
           echo $PR_NUMBER
           FILES=$(gh pr view $PR_NUMBER --json files -q '.files[].path')
           echo "$FILES" | grep '\.tf$' | sed 's|/[^/]*$||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))' > changed_dirs.json
+          cat changed_dirs.json
           echo "dirs=$(cat changed_dirs.json)" >> $GITHUB_OUTPUT
-          echo $dirs
+
+      - name: Confirm Output Setting
+        run: |
+          echo "Changes directories: ${{ steps.changed-dirs.outputs.dirs }}"
+
 
   terraform-preflight:
     name: "terraform-preflight"

@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -18,15 +18,23 @@ jobs:
 
       - name: Get unique changed files in PR
         id: changed-dirs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PR_NUMBER=${{ github.event.pull_request.number }}
           echo $PR_NUMBER
           FILES=$(gh pr view $PR_NUMBER --json files -q '.files[].path')
           echo "$FILES" | grep '\.tf$' | sed 's|/[^/]*$||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))' > changed_dirs.json
-          
           cat changed_dirs.json
-          
           echo "dirs=$(cat changed_dirs.json)" >> $GITHUB_OUTPUT
+
+      - name: Confirm Output
+        run: |
+          echo "Changes directories: ${{ steps.changed-dirs.outputs.dirs }}"
+
+    outputs:
+      dirs: ${{ steps.changed-dirs.outputs.dirs }}
+
 
   terraform-preflight:
     name: "terraform-preflight"
@@ -34,7 +42,7 @@ jobs:
     permissions:
       pull-requests: write
     needs: extract-changed-directories
-    if: fromJson(needs.extract-changed-directories.outputs.dirs) != '[]'
+    if: needs.extract-changed-directories.outputs.dirs != '[]' && needs.extract-changed-directories.outputs.dirs != ''
     strategy:
       matrix:
         dir: ${{ fromJson(needs.extract-changed-directories.outputs.dirs) }}
@@ -43,17 +51,15 @@ jobs:
         working-directory: ${{ matrix.dir }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
+        uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 0.13.0
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
-
-      - name: Terraform Format
-        id: fmt
-        run: terraform fmt -check
 
       - name: Terraform Init
         id: init
@@ -65,39 +71,29 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        if: github.event_name == 'pull_request'
         run: terraform plan -no-color -input=false
         continue-on-error: true
 
-      - name: Update Pull Request
-        uses: actions/github-script@v6
-        if: github.event_name == 'pull_request'
+      - name: Add a comment to the PR
         env:
-          PLAN: ${{ steps.plan.outputs.stdout }}
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
-            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          COMMENT="#### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
+          #### Terraform Validation 🤖 \`${{ steps.validate.outcome }}\`
+          #### Terraform Plan 📖 \`${{ steps.plan.outcome }}\`
 
-            <details><summary>Show Plan</summary>
+          <details><summary>Show Plan</summary>
 
-            \`\`\`terraform\n
-            ${process.env.PLAN}
-            \`\`\`
+          \`\`\`terraform
+          ${{ steps.plan.outputs.stdout }}
+          \`\`\`
 
-            </details>
+          </details>
 
-            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+          *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*"
 
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            })
+          gh pr comment "$PR_NUMBER" --body "$COMMENT"
 
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'

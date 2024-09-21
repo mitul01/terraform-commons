@@ -14,9 +14,6 @@ jobs:
       - name: Set up Git
         run: git fetch origin main
 
-      - name: Pull origin
-        run: git pull origin main --rebase
-
       - name: Get unique changed projects
         id: changed-dirs
         run: |

@@ -31,7 +31,7 @@ provider "aws" {
 }
 
 module "aws_asg_elb_cluster" {
-  source            = "github.com/mitul01/terraform-commons//modules/giaws-asg-elb-cluster?ref=main"
+  source            = "github.com/mitul01/terraform-commons//modules/aws-asg-elb-cluster?ref=main"
   project_name      = "tiny-webserver"
   image_id          = "ami-0fb653ca2d3203ac1"
   ec2_instance_type = "t2.micro"

@@ -72,8 +72,8 @@ jobs:
       - name: Terraform Plan
         id: plan
         env:
-          hcp_client_id: ${{ secrets.HCP_CLIENT_ID }}
-          hcp_client_secret: ${{ secrets.HCP_CLIENT_SECRET }}        
+          TF_VAR_hcp_client_id: ${{ secrets.HCP_CLIENT_ID }}
+          TF_VAR_hcp_client_secret: ${{ secrets.HCP_CLIENT_SECRET }}        
         run: terraform plan -no-color -input=false
         continue-on-error: true
 

@@ -54,4 +54,7 @@ jobs:
         run: terraform init
 
       - name: Terraform Apply
+        env:
+          hcp_client_id: ${{ secrets.HCP_CLIENT_ID }}
+          hcp_client_secret: ${{ secrets.HCP_CLIENT_SECRET }}
         run: terraform apply -auto-approve

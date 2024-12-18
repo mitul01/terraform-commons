@@ -1,6 +1,5 @@
 resource "proxmox_vm_qemu" "proxmox-vm-from-template" {
-    for_each = { for idx,value in var.vm_config["from_templates"] : join(":", [value.name,value.target_node]) } => value
-
+    for_each = { for idx,value in var.vm_config["from_templates"] : join(":", [value.name,value.target_node]) => value }
     name = each.value.name
     target_node = each.value.target_node
     clone_id = each.value.template_id

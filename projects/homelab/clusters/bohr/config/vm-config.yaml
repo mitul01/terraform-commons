@@ -1,0 +1,5 @@
+from_templates:
+    - name: testbed1
+      target_node: pve1
+      template_id: 200
+

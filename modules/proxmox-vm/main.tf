@@ -4,7 +4,7 @@ resource "proxmox_vm_qemu" "proxmox-vm-from-template" {
     name = each.value.name
     target_node = each.value.target_node
     clone_id = each.value.template_id
-    vmid = var.vm_template_metadata[each.value.template_id].id + idx
+    vmid = var.vm_template_metadata.templates[each.value.template_id].id + idx
     desc = lookup(each.value,"desc",null)
     bios = lookup(each.value,"bios",null)
     onboot = lookup(each.value,"onboot",null)
@@ -20,7 +20,7 @@ resource "proxmox_vm_qemu" "proxmox-vm-from-template" {
     lifecycle {
         precondition {
             condition = contains(keys(each.value),"name") && contains(keys(each.value),"target_node") && contains(keys(each.value),"template_id")
-            error = "VM's created 'from_template' requires 'name', 'target_node' and 'template_id' attributes."
+            error_message = "VM's created 'from_template' requires 'name', 'target_node' and 'template_id' attributes."
         }
     }
 }

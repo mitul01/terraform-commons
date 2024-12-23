@@ -10,8 +10,8 @@ resource "proxmox_vm_qemu" "proxmox-vm-from-template" {
     protection = lookup(each.value.data,"protection",null)
     agent = lookup(each.value.data,"enable_qemu_agent",null)
     full_clone = lookup(each.value.data,"full_clone",null)
-    memory = contains(each.value.data,"memory") ? lookup(each.value.data.memory,"limits",null) : null
-    balloon = contains(each.value.data,"memory") ? lookup(each.value.data.memory,"requests",null) : null
+    memory = contains(keys(each.value.data),"memory") ? lookup(each.value.data.memory,"limits",null) : null
+    balloon = contains(keys(each.value.data),"memory") ? lookup(each.value.data.memory,"requests",null) : null
     cores = lookup(each.value.data,"cpu_cores",null)
     tags = lookup(each.value.data,"tags",null)
     ciupgrade = lookup(each.value.data,"upgrade_packages_during_provisioning",null)

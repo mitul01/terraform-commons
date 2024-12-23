@@ -1,9 +1,21 @@
+# generate "backend" {
+#     path      = "backend.tf"
+#     if_exists = "overwrite"
+#     contents  = <<EOF
+#     terraform {
+#         backend "remote" {}
+#     EOF
+# }
+
 generate "dependencies" {
     path      = "depedencies.tf"
     if_exists = "overwrite"
     contents  = <<EOF
     data "hcp_vault_secrets_app" "proxmox_secret" {
         app_name = "proxmox"
+    }
+    data "hcp_vault_secrets_app" "ci_ubuntu_secret" {
+        app_name = "ubuntu-vms"
     }
     EOF
 }

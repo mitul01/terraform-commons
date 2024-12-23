@@ -3,8 +3,7 @@ include {
 }
 
 terraform {
-  #  source = "github.com/mitul01/terraform-commons//modules/proxmox-vm?ref=proxmox-vm-module"
-  source = "/Users/mitultandon/myprojects/terraform-commons/modules/proxmox-vm"
+  source = "github.com/mitul01/terraform-commons//modules/proxmox-vm?ref=proxmox-vm-module"
 }
 
 inputs = {

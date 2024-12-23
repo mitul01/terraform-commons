@@ -1,18 +1,3 @@
-generate "backend" {
-    path      = "backend.tf"
-    if_exists = "overwrite"
-    contents  = <<EOF
-    terraform {
-        backend "remote" {
-            organization = "empty-minds"
-
-            workspaces {
-                name = join("-","homelab","${basename(get_terragrunt_dir())}") 
-            }
-        }   
-    }
-}
-
 generate "dependencies" {
     path      = "depedencies.tf"
     if_exists = "overwrite"
@@ -42,9 +27,9 @@ generate "provider" {
         provider "hcp" {
         }
         provider "proxmox" {
-            pm_api_url          = data.hcp_vault_secrets_app.proxmox_secret.value.url
-            pm_api_token_id     = data.hcp_vault_secrets_app.proxmox_secret.value.token_id
-            pm_api_token_secret = data.hcp_vault_secrets_app.proxmox_secret.value.token_secret
+            pm_api_url          = data.hcp_vault_secrets_app.proxmox_secret.secrets.url
+            pm_api_token_id     = data.hcp_vault_secrets_app.proxmox_secret.secrets.token_id
+            pm_api_token_secret = data.hcp_vault_secrets_app.proxmox_secret.secrets.token_secret
         }
     EOF
 }

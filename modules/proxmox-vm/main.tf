@@ -3,7 +3,7 @@ resource "proxmox_vm_qemu" "proxmox-vm-from-template" {
     name = each.value.data.name
     target_node = each.value.data.target_node
     clone_id = each.value.data.template_id
-    vmid = sum([each.value.data.template_id,each.value.idx])
+    vmid = sum([each.value.data.template_id,each.value.idx,1])
     desc = lookup(each.value.data,"desc",null)
     bios = lookup(each.value.data,"bios",null)
     onboot = lookup(each.value.data,"onboot",null)

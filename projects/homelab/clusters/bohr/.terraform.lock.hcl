@@ -5,6 +5,7 @@ provider "registry.terraform.io/hashicorp/hcp" {
   version     = "0.101.0"
   constraints = "0.101.0"
   hashes = [
+    "h1:MYrDN+7bHDrcwmiA4jVvkrP/TK3Z2EY7BW9anIhkbLs=",
     "h1:wo4I4DhngDSUOj3hkBq/OQol27is0Qdc3AOfREDZI5U=",
     "zh:0eaefe8061d4bd32c9105411ac5cf03d3fb508d0fd9f8c80dbddda819738aeea",
     "zh:19049ed66eb79235ca6d9953734652af58b1645bd9f137c21395a2d9de2751b1",
@@ -26,6 +27,7 @@ provider "registry.terraform.io/telmate/proxmox" {
   constraints = "3.0.1-rc6"
   hashes = [
     "h1:YHPsBTy/pIUTk3TFr32ewIHGGQDDrbNAeEIVUdiD2+Y=",
+    "h1:p+Sw8jOkjvSxIlGmdtwnwdoazmKek5ZNRiM85/4T5DY=",
     "zh:02e86e192ffa995f39322946810650698c7de823c25da443b112cdd685666206",
     "zh:3ccc51116b2579138594d7afb2f559aed0ae525357ab8974712c7d75bfb69af6",
     "zh:59ac71b52d9a1e824bef413529a36179522561807fa8cdc920a5ccddc817a64f",

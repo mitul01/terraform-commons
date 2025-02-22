@@ -1,0 +1,4 @@
+templates:
+    - name: ubuntu
+      id: 200
+      desc: ""

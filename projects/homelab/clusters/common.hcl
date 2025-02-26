@@ -53,7 +53,7 @@ generate "provider" {
         provider "hcp" {
             client_id     = ""
             client_secret = ""
-            project_id    = "2011ab06-4a4a-4b21-985c-0a55421043d1"
+            project_id = "2011ab06-4a4a-4b21-985c-0a55421043d1"
         }
         provider "proxmox" {
             pm_api_url          = data.hcp_vault_secrets_app.proxmox_secret.secrets.url

@@ -1,11 +1,25 @@
-# generate "backend" {
-#     path      = "backend.tf"
-#     if_exists = "overwrite"
-#     contents  = <<EOF
-#     terraform {
-#         backend "remote" {}
-#     EOF
-# }
+locals {
+  tfc_hostname          = "app.terraform.io" # For TFE, substitute the custom hostname for your TFE host
+  tfc_organization      = "empty-minds"
+  workspace_name        = reverse(split("/", get_original_terragrunt_dir()))[0]
+  environment           = "homelab"
+}
+
+generate "remote_state" {
+    path      = "backend.tf"
+    if_exists = "overwrite_terragrunt"
+    contents = <<EOF
+    terraform {
+        backend "remote" {
+            hostname = "${local.tfc_hostname}"
+            organization = "${local.tfc_organization}"
+            workspaces {
+                name = "${local.workspace_name}-${local.environment}"
+            }
+        }
+    }
+    EOF
+}
 
 generate "dependencies" {
     path      = "depedencies.tf"
@@ -37,6 +51,8 @@ generate "provider" {
         }
     }
         provider "hcp" {
+            client_id     = ""
+            client_secret = ""
             project_id = "2011ab06-4a4a-4b21-985c-0a55421043d1"
         }
         provider "proxmox" {

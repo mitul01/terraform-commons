@@ -1,7 +1,12 @@
 name: "Preflight"
 
-on:
-  pull_request:
+# on:
+#   pull_request:
+
+env:
+  tf_version: 'latest'
+  tg_version: 'latest'
+  tf_working_dir: '.'
 
 jobs:
   extract-changed-directories:
@@ -24,7 +29,7 @@ jobs:
           PR_NUMBER=${{ github.event.pull_request.number }}
           echo $PR_NUMBER
           FILES=$(gh pr view $PR_NUMBER --json files -q '.files[].path')
-          echo "$FILES" | grep '^projects/.*\.tf$' | sed 's|/[^/]*$||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))' > changed_dirs.json
+          echo "$FILES" | grep '^projects/.*\.hcl$' | sed 's|/[^/]*$||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))' > changed_dirs.json
           cat changed_dirs.json
           echo "dirs=$(cat changed_dirs.json)" >> $GITHUB_OUTPUT
 
@@ -36,8 +41,8 @@ jobs:
       dirs: ${{ steps.changed-dirs.outputs.dirs }}
 
 
-  terraform-preflight:
-    name: "terraform-preflight"
+  terragrunt-preflight:
+    name: "terragrunt-preflight"
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -50,32 +55,54 @@ jobs:
       run:
         working-directory: ${{ matrix.dir }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: 'Checkout'
+        uses: actions/checkout@master
 
-      - name: Install GitHub CLI
-        run: sudo apt-get install gh
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+      - name: 'Terragrunt Format'
+        uses: the-commons-project/terragrunt-github-actions@master
         with:
-          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
-
-      - name: Terraform Init
-        id: init
-        run: terraform init
-      
-      - name: Terraform Validate
-        id: validate
-        run: terraform validate -no-color
-
-      - name: Terraform Plan
-        id: plan
+          tf_actions_version: ${{ env.tf_version }}
+          tg_actions_version: ${{ env.tg_version }}
+          tf_actions_binary: 'terraform'
+          tf_actions_subcommand: 'fmt'
+          tf_actions_working_dir: ${{ env.tf_working_dir }}
+          tf_actions_comment: true
         env:
-          TF_VAR_hcp_client_id: ${{ secrets.HCP_CLIENT_ID }}
-          TF_VAR_hcp_client_secret: ${{ secrets.HCP_CLIENT_SECRET }}        
-        run: terraform plan -no-color -input=false
-        continue-on-error: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 'Terragrunt Init'
+        uses: the-commons-project/terragrunt-github-actions@master
+        with:
+          tf_actions_version: ${{ env.tf_version }}
+          tg_actions_version: ${{ env.tg_version }}
+          tf_actions_subcommand: 'init'
+          tf_actions_working_dir: ${{ env.tf_working_dir }}
+          tf_actions_comment: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 'Terragrunt Validate'
+        uses: the-commons-project/terragrunt-github-actions@master
+        with:
+          tf_actions_version: ${{ env.tf_version }}
+          tg_actions_version: ${{ env.tg_version }}
+          tf_actions_binary: 'terraform'
+          tf_actions_subcommand: 'validate'
+          tf_actions_working_dir: ${{ env.tf_working_dir }}
+          tf_actions_comment: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 'Terragrunt Plan'
+        uses: the-commons-project/terragrunt-github-actions@master
+        with:
+          tf_actions_version: ${{ env.tf_version }}
+          tg_actions_version: ${{ env.tg_version }}
+          tf_actions_subcommand: 'plan'
+          tf_actions_working_dir: ${{ env.tf_working_dir }}
+          tf_actions_comment: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Add a comment to the PR
         env:

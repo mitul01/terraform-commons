@@ -1,7 +1,7 @@
 name: "Preflight"
 
-on:
-  pull_request:
+# on:
+#   pull_request:
 
 env:
   tf_version: 'latest'

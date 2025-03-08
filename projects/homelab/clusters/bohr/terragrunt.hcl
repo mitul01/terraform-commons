@@ -3,7 +3,7 @@ include {
 }
 
 terraform {
-  source = "github.com/mitul01/terraform-commons//modules/proxmox-vm?ref=proxmox-vm-module"
+  source = "../../../../modules/proxmox-vm"
 }
 
 locals {

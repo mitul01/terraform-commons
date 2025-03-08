@@ -1,44 +1,4 @@
-from_templates:
-    - name: testbed1
-      target_node: pve1
-      template_id: 200
-      full_clone: true
-      cpu_cores: 1
-      scsi_controller_type: virtio-scsi-single
-      enable_qemu_agent: 1
-      boot: order=ide2;scsi0;net0
-      onboot: true
-      ipconfig0: ip=dhcp
-      ciupgrade: true
-      memory:
-        limits: 1024
-        requests: 1024
-      disks:
-      # Only id: ide0,ide1,ide2 & scsi0
-      # type: cdrom, cloudinit, disk, passthrough
-      - id: ide0
-        type: cloudinit 
-        storage: local-lvm
-      - id: ide2
-        type: cdrom
-      - id: scsi0
-        type: disk
-        storage: local-lvm
-        emulatessd: true
-        size: 32G
-        discard: true
-        iothread: true
-        backup: true
-      networks:
-      - id: 0
-        model: virtio
-        bridge: vmbr0
-        firewall: true
-        rate: 0 # Set to 0 to disable rate limiting
-      serials:
-      - id: 0
-        type: socket
-    
+from_templates:    
     - name: k8s-master
       target_node: pve1
       template_id: 200
@@ -51,8 +11,8 @@ from_templates:
       ipconfig0: ip=dhcp
       ciupgrade: true
       memory:
-        limits: 2048
-        requests: 1024
+        limits: 3072
+        requests: 2048
       disks:
       - id: ide0
         type: cloudinit 
@@ -116,6 +76,44 @@ from_templates:
         type: socket
 
     - name: k8s-worker02
+      target_node: pve1
+      template_id: 200
+      full_clone: true
+      cpu_cores: 2
+      scsi_controller_type: virtio-scsi-single
+      enable_qemu_agent: 1
+      boot: order=ide2;scsi0;net0
+      onboot: true
+      ipconfig0: ip=dhcp
+      ciupgrade: true
+      memory:
+        limits: 2048
+        requests: 1024
+      disks:
+      - id: ide0
+        type: cloudinit 
+        storage: local-lvm
+      - id: ide2
+        type: cdrom
+      - id: scsi0
+        type: disk
+        storage: local-lvm
+        emulatessd: true
+        size: 32G
+        discard: true
+        iothread: true
+        backup: true
+      networks:
+      - id: 0
+        model: virtio
+        bridge: vmbr0
+        firewall: true
+        rate: 0
+      serials:
+      - id: 0
+        type: socket
+
+    - name: k8s-worker03
       target_node: pve1
       template_id: 200
       full_clone: true
